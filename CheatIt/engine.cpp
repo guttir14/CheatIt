@@ -3,22 +3,8 @@
 
 std::string FNameEntry::String()
 {
-	std::string name("\x0", Len);
-	String(name.data());
-	return name;
-}
-
-void FNameEntry::String(char* buf)
-{
-	if (bIsWide)
-	{
-		auto copied = WideCharToMultiByte(CP_UTF8, 0, WideName, Len, buf, Len, 0, 0);
-		if (copied == 0) { buf[0] = '\x0'; }
-	}
-	else
-	{
-		memcpy(buf, AnsiName, Len);
-	}
+	if (bIsWide) { return std::string(); }
+	return { AnsiName, Len };
 }
 
 FNameEntry* FNamePool::GetEntry(FNameEntryHandle handle) const
@@ -49,9 +35,9 @@ std::string UObject::GetName()
 
 std::string UObject::GetFullName()
 {
-	std::string temp;
-	for (auto outer = OuterPrivate; outer; outer = outer->OuterPrivate) { temp = outer->GetName() + "." + temp; }
-	std::string name = ClassPrivate->GetName() + " " + temp + this->GetName();
+	std::string name;
+	for (auto outer = OuterPrivate; outer; outer = outer->OuterPrivate) { name = outer->GetName() + "." + name; }
+	name = ClassPrivate->GetName() + " " + name + this->GetName();
 	return name;
 }
 
@@ -84,7 +70,7 @@ UObject* TUObjectArray::FindObject(const char* name) const
 	for (auto i = 0u; i < NumElements; i++)
 	{
 		auto object = GetObjectPtr(i);
-		if (object->GetFullName() == name) { return object; }
+		if (object && object->GetFullName() == name) { return object; }
 	}
 	return nullptr;
 }
@@ -148,7 +134,6 @@ bool APlayerController::ProjectWorldLocationToScreen(FVector& WorldLocation, FVe
 	ScreenLocation = parms.ScreenLocation;
 	return parms.ReturnValue;
 }
-
 
 bool EngineInit()
 {

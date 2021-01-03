@@ -6,6 +6,7 @@
 
 struct FVector {
 	float X, Y, Z;
+
 	FVector() : X(0.f), Y(0.f), Z(0.f) {}
 	FVector(float X, float Y, float Z) : X(X), Y(Y), Z(Z) {}
 	FVector(float InF) : X(InF), Y(InF), Z(InF) { }
@@ -28,7 +29,6 @@ struct FLinearColor {
 	FLinearColor(float R, float G, float B, float A) : R(R), G(G), B(B), A(A) {};
 };
 
-
 template<typename T>
 struct TArray {
 	T* Data;
@@ -38,17 +38,16 @@ struct TArray {
 
 struct FString : TArray<wchar_t> {};
 
-struct FNameEntryHandle
-{
+struct FNameEntryHandle {
 	uint32_t Block = 0;
 	uint32_t Offset = 0;
+
 	FNameEntryHandle(uint32_t block, uint32_t offset) : Block(block), Offset(offset) {};
 	FNameEntryHandle(uint32_t id) : Block(id >> 16), Offset(id & 65535) {};
 	operator uint32_t() const { return (Block << 16 | Offset); }
 };
 
-struct FNameEntry
-{
+struct FNameEntry {
 	uint16_t bIsWide : 1;
 	uint16_t LowercaseProbeHash : 5;
 	uint16_t Len : 10;
@@ -57,8 +56,8 @@ struct FNameEntry
 		char AnsiName[1024];
 		wchar_t	WideName[1024];
 	};
+
 	std::string String();
-	void String(char* buf);
 };
 
 struct FNamePool 
@@ -67,12 +66,14 @@ struct FNamePool
 	uint32_t CurrentBlock;
 	uint32_t CurrentByteCursor;
 	byte* Blocks[8192];
+
 	FNameEntry* GetEntry(FNameEntryHandle handle) const;
 };
 
 struct FName {
 	uint32_t Index;
 	uint32_t Number;
+
 	std::string GetName();
 };
 
@@ -90,22 +91,28 @@ struct UObject {
 	void ProcessEvent(void* fn, void* parms);
 };
 
-struct UField : public UObject {
+
+// Class CoreUObject.Field
+// Size: 0x30 (Inherited: 0x28)
+struct UField : UObject {
 	char UnknownData_28[0x8]; // 0x28(0x08)
 };
 
-struct UStruct : public UField {
+// Class CoreUObject.Struct
+// Size: 0xb0 (Inherited: 0x30)
+struct UStruct : UField {
 	char UnknownData_30[0x10]; // 0x30(0x10)
 	UStruct* SuperStruct; // 0x40(0x8)
 	char UnknownData_48[0x68]; // 0x48(0x80)
 };
 
-struct UClass : public UStruct {
+// Class CoreUObject.Class
+// Size: 0x230 (Inherited: 0xb0)
+struct UClass : UStruct {
 	char UnknownData_B0[0x180]; // 0xb0(0x180)
 };
 
-struct TUObjectArray
-{
+struct TUObjectArray {
 	byte** Objects;
 	byte* PreAllocatedObjects;
 	uint32_t MaxElements;
@@ -119,8 +126,7 @@ struct TUObjectArray
 
 // Class Engine.Canvas
 // Size: 0x2c0 (Inherited: 0x28)
-struct UCanvas : UObject
-{
+struct UCanvas : UObject {
 	void K2_DrawText(void* RenderFont, FString& RenderText, FVector2D& ScreenPosition, FVector2D& Scale, FLinearColor& RenderColor, float Kerning, FLinearColor& ShadowColor, FVector2D& ShadowOffset, bool bCentreX, bool bCentreY, bool bOutlined, FLinearColor& OutlineColor); // Function Engine.Canvas.K2_DrawText
 };
 
@@ -128,6 +134,7 @@ struct UCanvas : UObject
 // Size: 0x220 (Inherited: 0x28)
 struct AActor : UObject {
 	char pad_28[0x1F8]; // 0x28(0x1F8)
+
 	FVector K2_GetActorLocation();
 };
 
@@ -139,25 +146,24 @@ struct APawn : AActor {
 
 // Class Engine.PlayerCameraManager
 // Size: 0x2740 (Inherited: 0x220)
-struct APlayerCameraManager : AActor
-{
+struct APlayerCameraManager : AActor {
 	char pad_220[0x2520]; // 0x220
 };
 
 // Class Engine.Controller
 // Size: 0x298 (Inherited: 0x220)
 struct AController : AActor {
-
 	char pad_220[0x78];
+
 	struct APawn* K2_GetPawn();
 };
 
 // Class Engine.PlayerController
 // Size: 0x570 (Inherited: 0x298)
 struct APlayerController : AController {
-
 	char pad_298[0x20]; // 0x298(0x08)
-	struct APlayerCameraManager* PlayerCameraManager;
+	struct APlayerCameraManager* PlayerCameraManager; // 0x2b8(0x08)
+
 	bool ProjectWorldLocationToScreen(struct FVector& WorldLocation, struct FVector2D& ScreenLocation, bool bPlayerViewportRelative); // Function Engine.PlayerController.ProjectWorldLocationToScreen
 };
 
@@ -186,7 +192,7 @@ struct AGameStateBase : AActor {
 
 // Class Engine.GameInstance
 // Size: 0x198 (Inherited: 0x28)
-struct UGameInstance : public UObject {
+struct UGameInstance : UObject {
 	char UnknownData_28[0x10]; // 0x28(0x10)
 	struct TArray<struct UPlayer*> LocalPlayers; // 0x38(0x10)
 };
